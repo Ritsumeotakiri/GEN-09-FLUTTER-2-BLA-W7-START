@@ -1,20 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:week_3_blabla_project/model/ride/ride_pref.dart';
-import 'package:week_3_blabla_project/repository/ride_preferences_repository.dart';
-
-class AsyncValue<T> {
-  final T? data;
-  final Object? error;
-  final bool isLoading;
-
-  AsyncValue._({this.data, this.error, this.isLoading = false});
-
-  factory AsyncValue.loading() => AsyncValue._(isLoading: true);
-
-  factory AsyncValue.success(T data) => AsyncValue._(data: data);
-
-  factory AsyncValue.error(Object error) => AsyncValue._(error: error);
-}
+import 'package:week_3_blabla_project/data/repository/ride_preferences_repository.dart';
+import 'package:week_3_blabla_project/ui/providers/async_calue.dart';
 
 class RidesPreferencesProvider extends ChangeNotifier {
   RidePreference? _currentPreference;
