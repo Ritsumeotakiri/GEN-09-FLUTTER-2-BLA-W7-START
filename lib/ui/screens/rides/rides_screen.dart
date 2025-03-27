@@ -19,7 +19,7 @@ class RidesScreen extends StatelessWidget {
   void onRidePrefSelected(BuildContext context, RidePreference newPreference) {
     context
         .read<RidesPreferencesProvider>()
-        .setCurrentPreferrence(newPreference);
+        .setCurrentPreference(newPreference);
   }
 
   void onPreferencePressed(BuildContext context) async {
@@ -33,7 +33,7 @@ class RidesScreen extends StatelessWidget {
     );
 
     if (newPreference != null) {
-      provider.setCurrentPreferrence(newPreference);
+      provider.setCurrentPreference(newPreference);
     }
   }
 

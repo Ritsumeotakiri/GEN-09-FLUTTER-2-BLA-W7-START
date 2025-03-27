@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:week_3_blabla_project/providers/ridesPreferencesProviser.dart';
 
 import '../../../model/ride/ride_pref.dart';
-import '../../../providers/ridesPreferencesProviser.dart';
+// Fixed import typo
 import '../../../utils/animations_util.dart';
 import '../rides/rides_screen.dart';
 import 'widgets/ride_pref_form.dart';
@@ -10,44 +11,69 @@ import 'widgets/ride_pref_history_tile.dart';
 
 const String blablaHomeImagePath = 'assets/images/blabla_home.png';
 
+/// Ride Preferences Screen
 ///
-/// This screen allows user to:
-/// - Enter his/her ride preference and launch a search on it
-/// - Or select a last entered ride preferences and launch a search on it
-///
+/// This screen allows users to:
+/// - Enter their ride preferences and launch a search.
+/// - Select a previous ride preference and launch a search.
 class RidePrefScreen extends StatelessWidget {
   const RidePrefScreen({super.key});
 
   void onRidePrefSelected(
       BuildContext context, RidePreference newPreference) async {
-    // Read the RidesPreferencesProvider and update the current preference
     final provider =
         Provider.of<RidesPreferencesProvider>(context, listen: false);
-    provider.setCurrentPreferrence(newPreference);
+    provider.setCurrentPreference(newPreference);
 
-    // Navigate to the rides screen (with a bottom-to-top animation)
+    // Navigate to the rides screen with an animation
     await Navigator.of(context).push(
-      AnimationUtils.createBottomToTopRoute(RidesScreen()),
+      AnimationUtils.createBottomToTopRoute(const RidesScreen()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Watch the RidesPreferencesProvider to get the current preference and history
     final provider = Provider.of<RidesPreferencesProvider>(context);
+    final pastPreferencesState = provider.pastPreferences;
+
+    // Handle Loading State
+    if (pastPreferencesState.isLoading) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 8),
+            Text('Loading...'),
+          ],
+        ),
+      );
+    }
+
+    // Handle Error State
+    if (pastPreferencesState.error != null) {
+      return const Center(
+        child: Text(
+          'No connection. Try later',
+          style: TextStyle(color: Colors.red, fontSize: 16),
+        ),
+      );
+    }
+
+    // Handle Success State
+    final pastPreferences = pastPreferencesState.data ?? [];
     final currentRidePreference = provider.currentPreference;
-    final pastPreferences = provider.preferencesHistory;
 
     return Stack(
       children: [
-        // 1 - Background Image
+        // Background Image
         const BlaBackground(),
 
-        // 2 - Foreground content
+        // Foreground Content
         Column(
           children: [
             const SizedBox(height: 16),
-            Text(
+            const Text(
               "Your pick of rides at low price",
               style: TextStyle(
                   fontSize: 24,
@@ -57,15 +83,15 @@ class RidePrefScreen extends StatelessWidget {
             const SizedBox(height: 100),
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white, // White background
-                borderRadius: BorderRadius.circular(16), // Rounded corners
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // 2.1 Display the Form to input the ride preferences
+                  // Ride Preference Form
                   RidePrefForm(
                     initialPreference: currentRidePreference,
                     onSubmit: (newPreference) =>
@@ -73,20 +99,21 @@ class RidePrefScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // 2.2 Optionally display a list of past preferences
-                  SizedBox(
-                    height: 200, // Set a fixed height
-                    child: ListView.builder(
-                      shrinkWrap: true, // Fix ListView height issue
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: pastPreferences.length,
-                      itemBuilder: (ctx, index) => RidePrefHistoryTile(
-                        ridePref: pastPreferences[index],
-                        onPressed: () =>
-                            onRidePrefSelected(context, pastPreferences[index]),
+                  // Past Preferences History
+                  if (pastPreferences.isNotEmpty)
+                    SizedBox(
+                      height: 200,
+                      child: ListView.builder(
+                        padding: const EdgeInsets.only(top: 8),
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        itemCount: pastPreferences.length,
+                        itemBuilder: (ctx, index) => RidePrefHistoryTile(
+                          ridePref: pastPreferences.reversed.toList()[index],
+                          onPressed: () => onRidePrefSelected(
+                              context, pastPreferences[index]),
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -97,6 +124,7 @@ class RidePrefScreen extends StatelessWidget {
   }
 }
 
+/// Background Widget with Image
 class BlaBackground extends StatelessWidget {
   const BlaBackground({super.key});
 
@@ -107,7 +135,7 @@ class BlaBackground extends StatelessWidget {
       height: 340,
       child: Image.asset(
         blablaHomeImagePath,
-        fit: BoxFit.cover, // Adjust image fit to cover the container
+        fit: BoxFit.cover,
       ),
     );
   }
