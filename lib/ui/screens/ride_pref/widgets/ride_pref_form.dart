@@ -129,6 +129,28 @@ class _RidePrefFormState extends State<RidePrefForm> {
     });
   }
 
+  @override
+  void didUpdateWidget(covariant RidePrefForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Reinitialize the state if the initial preference changes
+    if (widget.initialPreference != oldWidget.initialPreference) {
+      if (widget.initialPreference != null) {
+        RidePreference current = widget.initialPreference!;
+        departure = current.departure;
+        arrival = current.arrival;
+        departureDate = current.departureDate;
+        requestedSeats = current.requestedSeats;
+      } else {
+        // Reset to default values if no initial preference is provided
+        departure = null;
+        departureDate = DateTime.now();
+        arrival = null;
+        requestedSeats = 1;
+      }
+    }
+  }
+
   // ----------------------------------
   // Compute the widgets rendering
   // ----------------------------------
